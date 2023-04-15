@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id             String          @id @unique @default(uuid()) @db.VarChar(255)
+  name           String          @db.VarChar(255)
+  description    String?         @db.VarChar(255)
+  deadline       DateTime?
+  createdAt      DateTime        @default(now())
+  isDone         Boolean         @default(false)
+  leaderId       String          @db.VarChar(255)
+  leader         User            @relation(fields: [leaderId], references: [id], name: "LeadingProjects")
+  projectMembers ProjectsUsers[]
+  lists          List[]
+  comments       Comment[]
+
+  @@unique([leaderId, name], name: "uniqueProjectNamePerLeader")
+}
+
+model User {
+  id               String          @id @unique @default(uuid()) @db.VarChar(255)
+  name             String          @db.VarChar(255)
+  email            String          @unique @db.VarChar(255)
+  password         String          @db.VarChar(255)
+  avatar           String?         @db.VarChar(255)
+  isAdmin          Boolean         @default(false)
+  joinedAt         DateTime        @default(now())
+  leading          Project[]       @relation(name: "LeadingProjects")
+  memberInProjects ProjectsUsers[]
+  memberInTasks    TasksUsers[]
+  comments         Comment[]
+}
+
+model List {
+  id        Int     @default(1)
+  projectId String  @db.VarChar(255)
+  name      String  @default("To do") @db.VarChar(255)
+  inProject Project @relation(fields: [projectId], references: [id])
+  tasks     Task[]
+
+  @@id([projectId, id])
+}
+
+model Task {
+  id            String       @id @unique @default(uuid()) @db.VarChar(255)
+  name          String       @db.VarChar(255)
+  description   String?      @db.VarChar(255)
+  deadline      DateTime?
+  createdAt     DateTime     @default(now())
+  indexNumber   Int
+  listId        Int          @default(1)
+  listProjectId String
+  inList        List         @relation(fields: [listProjectId, listId], references: [projectId, id])
+  taskMembers   TasksUsers[]
+  comments      Comment[]
+
+  @@unique([listProjectId, name], name: "uniqueTaskNamePerProject")
+  @@unique([listId, indexNumber], name: "listIndexNumber")
+}
+
+model Comment {
+  id        String   @id @unique @default(uuid()) @db.VarChar(255)
+  content   String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  authorId  String   @db.VarChar(255)
+  author    User     @relation(fields: [authorId], references: [id])
+  taskId    String   @db.VarChar(255)
+  inTask    Task     @relation(fields: [taskId], references: [id])
+  projectId String   @db.VarChar(255)
+  inProject Project  @relation(fields: [projectId], references: [id])
+}
+
+model ProjectsUsers {
+  projectId           String   @db.VarChar(255)
+  project             Project  @relation(fields: [projectId], references: [id])
+  userId              String   @db.VarChar(255)
+  user                User     @relation(fields: [userId], references: [id])
+  assignedAt          DateTime @default(now())
+  isUserProjectLeader Boolean  @default(false)
+
+  @@id([projectId, userId])
+  @@unique([projectId, userId])
+}
+
+model TasksUsers {
+  taskId              String   @db.VarChar(255)
+  task                Task     @relation(fields: [taskId], references: [id])
+  userId              String   @db.VarChar(255)
+  user                User     @relation(fields: [userId], references: [id])
+  assignedAt          DateTime @default(now())
+  isUserProjectLeader Boolean  @default(false)
+
+  @@id([taskId, userId])
+  @@unique([taskId, userId])
+}
