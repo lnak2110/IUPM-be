@@ -1,6 +1,15 @@
 const { userPublicFields, membersOrder } = require('../utils/fields');
 const prisma = require('../utils/prisma');
 
+const findManyProjectsByUser = async (id) => {
+  const result = await prisma.projectsUsers.findMany({
+    where: { userId: id },
+    include: { project: true },
+  });
+
+  return result;
+};
+
 const findOneProject = async (id) => {
   const result = await prisma.project.findUnique({
     where: { id },
@@ -159,6 +168,7 @@ const updateOneProjectManyMembers = async (
 };
 
 module.exports = {
+  findManyProjectsByUser,
   findOneProject,
   findOneProjectByNameAndLeader,
   findOneProjectWithMembers,

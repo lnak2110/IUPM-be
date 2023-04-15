@@ -10,10 +10,12 @@ const {
 const { checkToken } = require('../utils/jwtoken');
 const {
   checkPermissionLoggedIn,
+  checkUserPermission,
   checkProjectPermission,
   checkProjectMemberPermission,
 } = require('../utils/permission');
 const {
+  getProjectsByUser,
   getProject,
   createProject,
   updateProject,
@@ -27,6 +29,16 @@ const {
 } = require('../utils/databaseValidation');
 
 const projectRoute = express.Router();
+
+projectRoute.get(
+  '/user/:id',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkUserById('params'),
+  checkUserPermission,
+  getProjectsByUser
+);
 
 projectRoute.get(
   '/:id',
@@ -64,7 +76,7 @@ projectRoute.patch(
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
   checkProjectPermission,
-  checkUserById,
+  checkUserById('body'),
   updateProjectAddOneMember
 );
 

@@ -35,7 +35,7 @@ const checkPermissionLoggedIn = async (req, res, next) => {
   }
 };
 
-const checkUserPermission = async (req, res, next) => {
+const checkUserPermission = (req, res, next) => {
   try {
     const { id } = req.params;
 

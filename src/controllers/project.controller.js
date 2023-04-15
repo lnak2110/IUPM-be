@@ -3,8 +3,26 @@ const {
   updateOneProject,
   updateOneProjectAddOneMember,
   updateOneProjectManyMembers,
+  findManyProjectsByUser,
 } = require('../services/project.service');
 const { successCode, errorCode } = require('../utils/response');
+
+const getProjectsByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await findManyProjectsByUser(id);
+
+    return successCode(
+      res,
+      `Get projects with user id ${id} successfully!`,
+      result
+    );
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
 
 const getProject = (req, res) => {
   try {
@@ -139,6 +157,7 @@ const updateProjectManyMembers = async (req, res) => {
 };
 
 module.exports = {
+  getProjectsByUser,
   getProject,
   createProject,
   updateProject,

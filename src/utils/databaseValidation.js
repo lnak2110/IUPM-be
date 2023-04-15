@@ -6,9 +6,9 @@ const { findOneTaskByNameAndProject } = require('../services/task.service');
 const { failCode, notFoundCode, errorCode } = require('./response');
 const { findOneUser, findManyUsersById } = require('../services/user.service');
 
-const checkUserById = async (req, res, next) => {
+const checkUserById = (part) => async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { id } = req[part];
 
     const userFound = await findOneUser(id);
 
