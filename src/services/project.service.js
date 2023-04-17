@@ -118,6 +118,17 @@ const updateOneProject = async (id, newProjectData) => {
   return result;
 };
 
+const updateOneProjectToggleDone = async (id, isDone) => {
+  const result = await prisma.project.update({
+    where: { id },
+    data: {
+      isDone: { set: isDone },
+    },
+  });
+
+  return result;
+};
+
 const updateOneProjectAddOneMember = async (id, userId, leaderId) => {
   const result = await prisma.project.update({
     where: { id },
@@ -211,6 +222,7 @@ module.exports = {
   findOneProjectWithMembersListsTasks,
   createOneProject,
   updateOneProject,
+  updateOneProjectToggleDone,
   updateOneProjectAddOneMember,
   updateOneProjectDeleteOneMember,
   updateOneProjectManyMembers,
