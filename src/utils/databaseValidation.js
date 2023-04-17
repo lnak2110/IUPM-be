@@ -4,7 +4,11 @@ const {
 } = require('../services/project.service');
 const { findOneTaskByNameAndProject } = require('../services/task.service');
 const { failCode, notFoundCode, errorCode } = require('./response');
-const { findOneUser, findManyUsersById } = require('../services/user.service');
+const {
+  findOneUser,
+  findManyUsersById,
+  findManyUsersByIdInProject,
+} = require('../services/user.service');
 
 const checkUserById = (part) => async (req, res, next) => {
   try {
@@ -33,6 +37,28 @@ const checkUsersByIds = async (req, res, next) => {
       next();
     } else {
       return notFoundCode(res, 'One or more users not found!');
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const checkUsersByIdsInProject = async (req, res, next) => {
+  try {
+    const { taskMembers } = req.body;
+
+    const { projectFound } = req;
+
+    const usersFound = await findManyUsersByIdInProject(
+      taskMembers,
+      projectFound.id
+    );
+
+    if (usersFound.length === taskMembers.length) {
+      next();
+    } else {
+      return notFoundCode(res, 'One or more users not in project!');
     }
   } catch (error) {
     console.log(error);
@@ -105,36 +131,11 @@ const checkTaskDeadline = (req, res, next) => {
   }
 };
 
-const checkTaskMembersInProject = (req, res, next) => {
-  try {
-    const { taskMembers } = req.body;
-
-    const { projectFound } = req;
-
-    const projectMembersIds = projectFound.projectMembers.map(
-      (pm) => pm.user.id
-    );
-
-    const isEveryTaskMembersInProject = taskMembers.every((id) =>
-      projectMembersIds.includes(id)
-    );
-
-    if (isEveryTaskMembersInProject) {
-      next();
-    } else {
-      return failCode(res, 'One or more task members are not in this project!');
-    }
-  } catch (error) {
-    console.log(error);
-    return errorCode(res);
-  }
-};
-
 module.exports = {
   checkUserById,
   checkUsersByIds,
+  checkUsersByIdsInProject,
   checkProjectName,
   checkTaskName,
   checkTaskDeadline,
-  checkTaskMembersInProject,
 };

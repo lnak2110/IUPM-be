@@ -110,6 +110,11 @@ const idParamsSchema = yup.object({
   }),
 });
 
+const validateIdFromToken = (id) => {
+  console.log(id);
+  yup.string().trim().uuid().required().validateSync(id);
+};
+
 const validateBody = (schema) => (req, res, next) => {
   try {
     schema.validateSync({
@@ -145,6 +150,7 @@ module.exports = {
   idSchema,
   idsArraySchema,
   idParamsSchema,
+  validateIdFromToken,
   validateBody,
   validateParams,
 };

@@ -14,12 +14,17 @@ const userPublicFields = {
   avatar: true,
 };
 
+const order = Object.freeze({
+  asc: 'asc',
+  desc: 'desc',
+});
+
 const membersOrder = [
   {
-    assignedAt: 'asc',
+    isUserProjectLeader: order.desc,
   },
   {
-    isUserProjectLeader: 'asc',
+    assignedAt: order.asc,
   },
 ];
 

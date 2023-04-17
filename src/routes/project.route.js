@@ -19,8 +19,10 @@ const {
   getProject,
   createProject,
   updateProject,
-  updateProjectAddOneMember,
+  updateProjectAddMember,
+  updateProjectDeleteMember,
   updateProjectManyMembers,
+  deleteProject,
 } = require('../controllers/project.controller');
 const {
   checkProjectName,
@@ -64,7 +66,7 @@ projectRoute.put(
   validateBody(projectSchema),
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkProjectPermission,
+  checkProjectPermission('params', 'id'),
   checkProjectName,
   updateProject
 );
@@ -75,9 +77,20 @@ projectRoute.patch(
   validateBody(idSchema),
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkProjectPermission,
+  checkProjectPermission('params', 'id'),
   checkUserById('body'),
-  updateProjectAddOneMember
+  updateProjectAddMember
+);
+
+projectRoute.patch(
+  '/:id/delete-member',
+  checkToken,
+  validateBody(idSchema),
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectPermission('params', 'id'),
+  checkUserById('body'),
+  updateProjectDeleteMember
 );
 
 projectRoute.patch(
@@ -86,9 +99,18 @@ projectRoute.patch(
   validateBody(idsArraySchema),
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkProjectPermission,
+  checkProjectPermission('params', 'id'),
   checkUsersByIds,
   updateProjectManyMembers
+);
+
+projectRoute.delete(
+  '/:id',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectPermission('params', 'id'),
+  deleteProject
 );
 
 module.exports = projectRoute;

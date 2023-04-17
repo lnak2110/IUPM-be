@@ -1,7 +1,9 @@
 const {
+  findOneTaskWithMembersAndComments,
+  countTasksInList,
   createOneTask,
   updateOneTask,
-  countTasksInList,
+  updateManyTasksDecreaseIndexNumber,
 } = require('../services/task.service');
 const { successCode, errorCode } = require('../utils/response');
 
@@ -9,9 +11,13 @@ const getTask = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { taskFound } = req;
+    const result = await findOneTaskWithMembersAndComments(id);
 
-    return successCode(res, `Get task with id ${id} successfully!`, taskFound);
+    if (result) {
+      return successCode(res, `Get task with id ${id} successfully!`, result);
+    } else {
+      return notFoundCode(res, 'Task not found!');
+    }
   } catch (error) {
     console.log(error);
     return errorCode(res);
@@ -62,24 +68,17 @@ const updateTask = async (req, res) => {
 
     const { name, description, deadline, listId, taskMembers } = req.body;
 
-    // Need to be disconnect
-    const taskMembersIdsNotInNewList = taskFound.taskMembers
-      .map((tm) => tm.user.id)
-      .filter((member) => !taskMembers.includes(member));
-
     if (listId === taskFound.listId) {
       const newTaskData = {
         name,
         description,
         deadline: new Date(deadline),
-        listId,
         taskMembers,
       };
 
       const result = await updateOneTask(
         id,
         newTaskData,
-        taskMembersIdsNotInNewList,
         projectFound.leaderId
       );
 
@@ -110,8 +109,13 @@ const updateTask = async (req, res) => {
       const result = await updateOneTask(
         id,
         newTaskData,
-        taskMembersIdsNotInNewList,
         projectFound.leaderId
+      );
+
+      await updateManyTasksDecreaseIndexNumber(
+        projectFound.id,
+        taskFound.listId,
+        taskFound.indexNumber
       );
 
       if (result) {

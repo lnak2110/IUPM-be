@@ -89,12 +89,7 @@ const createOneTask = async (newTaskData, leaderId) => {
   return result;
 };
 
-const updateOneTask = async (
-  id,
-  newTaskData,
-  taskMembersIdsNotInNewList,
-  leaderId
-) => {
+const updateOneTask = async (id, newTaskData, leaderId) => {
   const result = await prisma.task.update({
     where: { id },
     data: {
@@ -102,7 +97,7 @@ const updateOneTask = async (
       taskMembers: {
         deleteMany: {
           taskId: id,
-          userId: { in: taskMembersIdsNotInNewList },
+          userId: { notIn: newTaskData.taskMembers },
         },
 
         connectOrCreate: newTaskData.taskMembers.map((userId) => ({
@@ -121,6 +116,23 @@ const updateOneTask = async (
   return result;
 };
 
+const updateManyTasksDecreaseIndexNumber = async (
+  projectId,
+  listId,
+  indexNumber
+) => {
+  const result = await prisma.task.updateMany({
+    where: {
+      listProjectId: projectId,
+      listId,
+      indexNumber: { gt: indexNumber },
+    },
+    data: { indexNumber: { decrement: 1 } },
+  });
+
+  return result;
+};
+
 module.exports = {
   findOneTask,
   findOneTaskWithMembers,
@@ -129,4 +141,5 @@ module.exports = {
   countTasksInList,
   createOneTask,
   updateOneTask,
+  updateManyTasksDecreaseIndexNumber,
 };
