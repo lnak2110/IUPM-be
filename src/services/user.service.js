@@ -52,6 +52,17 @@ const findManyUsersById = async (idsArr) => {
   return result;
 };
 
+const findManyUsersByIdInProject = async (idsArr, projectId) => {
+  const result = await prisma.projectsUsers.findMany({
+    where: {
+      userId: { in: idsArr },
+      projectId,
+    },
+  });
+
+  return result;
+};
+
 const findOneUser = async (id) => {
   const result = await prisma.user.findUnique({
     where: { id },
@@ -136,6 +147,7 @@ module.exports = {
   findManyUsersByName,
   findManyUsersByNamePagination,
   findManyUsersById,
+  findManyUsersByIdInProject,
   findOneUser,
   findOneUserSelectRoomsOwned,
   findOneUserSelectRole,

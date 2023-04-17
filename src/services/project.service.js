@@ -10,6 +10,16 @@ const findManyProjectsByUser = async (id) => {
   return result;
 };
 
+const findOneProjectsUsers = async (id, userId) => {
+  const result = await prisma.projectsUsers.findUnique({
+    where: {
+      projectId_userId: { projectId: id, userId },
+    },
+  });
+
+  return result;
+};
+
 const findOneProject = async (id) => {
   const result = await prisma.project.findUnique({
     where: { id },
@@ -129,19 +139,36 @@ const updateOneProjectAddOneMember = async (id, userId, leaderId) => {
   return result;
 };
 
-const updateOneProjectManyMembers = async (
-  id,
-  idsArr,
-  projectMembersIdsNotInNewList,
-  leaderId
-) => {
+const updateOneProjectDeleteOneMember = async (id, userId) => {
+  const result = await prisma.project.update({
+    where: { id },
+    data: {
+      projectMembers: {
+        delete: {
+          projectId_userId: { projectId: id, userId },
+        },
+      },
+    },
+  });
+
+  await prisma.tasksUsers.deleteMany({
+    where: {
+      task: { listProjectId: id },
+      userId: { equals: userId },
+    },
+  });
+
+  return result;
+};
+
+const updateOneProjectManyMembers = async (id, idsArr, leaderId) => {
   const result = await prisma.project.update({
     where: { id },
     data: {
       projectMembers: {
         deleteMany: {
           projectId: id,
-          userId: { in: projectMembersIdsNotInNewList },
+          userId: { notIn: idsArr },
         },
 
         connectOrCreate: idsArr.map((userId) => ({
@@ -160,8 +187,16 @@ const updateOneProjectManyMembers = async (
   await prisma.tasksUsers.deleteMany({
     where: {
       task: { listProjectId: id },
-      userId: { in: projectMembersIdsNotInNewList },
+      userId: { notIn: idsArr },
     },
+  });
+
+  return result;
+};
+
+const deleteOneProject = async (id) => {
+  const result = await prisma.project.delete({
+    where: { id },
   });
 
   return result;
@@ -169,6 +204,7 @@ const updateOneProjectManyMembers = async (
 
 module.exports = {
   findManyProjectsByUser,
+  findOneProjectsUsers,
   findOneProject,
   findOneProjectByNameAndLeader,
   findOneProjectWithMembers,
@@ -176,5 +212,7 @@ module.exports = {
   createOneProject,
   updateOneProject,
   updateOneProjectAddOneMember,
+  updateOneProjectDeleteOneMember,
   updateOneProjectManyMembers,
+  deleteOneProject,
 };

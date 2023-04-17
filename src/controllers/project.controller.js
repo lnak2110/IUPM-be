@@ -1,11 +1,20 @@
 const {
+  findManyProjectsByUser,
+  findOneProjectWithMembersListsTasks,
   createOneProject,
   updateOneProject,
   updateOneProjectAddOneMember,
+  updateOneProjectDeleteOneMember,
   updateOneProjectManyMembers,
-  findManyProjectsByUser,
+  deleteOneProject,
+  findOneProjectsUsers,
 } = require('../services/project.service');
-const { successCode, errorCode } = require('../utils/response');
+const {
+  successCode,
+  failCode,
+  notFoundCode,
+  errorCode,
+} = require('../utils/response');
 
 const getProjectsByUser = async (req, res) => {
   try {
@@ -13,28 +22,36 @@ const getProjectsByUser = async (req, res) => {
 
     const result = await findManyProjectsByUser(id);
 
-    return successCode(
-      res,
-      `Get projects with user id ${id} successfully!`,
-      result
-    );
+    if (result) {
+      return successCode(
+        res,
+        `Get projects with user id ${id} successfully!`,
+        result
+      );
+    } else {
+      return errorCode(res);
+    }
   } catch (error) {
     console.log(error);
     return errorCode(res);
   }
 };
 
-const getProject = (req, res) => {
+const getProject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { projectFound } = req;
+    const result = await findOneProjectWithMembersListsTasks(id);
 
-    return successCode(
-      res,
-      `Get project with id ${id} successfully!`,
-      projectFound
-    );
+    if (result) {
+      return successCode(
+        res,
+        `Get project with id ${id} successfully!`,
+        result
+      );
+    } else {
+      return notFoundCode(res, 'Project not found!');
+    }
   } catch (error) {
     console.log(error);
     return errorCode(res);
@@ -96,7 +113,7 @@ const updateProject = async (req, res) => {
   }
 };
 
-const updateProjectAddOneMember = async (req, res) => {
+const updateProjectAddMember = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -121,25 +138,56 @@ const updateProjectAddOneMember = async (req, res) => {
   }
 };
 
+const updateProjectDeleteMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { id: userId } = req.body;
+
+    const { leaderId } = req.projectFound;
+
+    if (userId === leaderId) {
+      return failCode(res, 'Cannot delete leader from project!');
+    }
+
+    const isUserInProject = await findOneProjectsUsers(id, userId);
+
+    if (!isUserInProject) {
+      return failCode(res, 'User is not in project!');
+    }
+
+    const result = await updateOneProjectDeleteOneMember(id, userId);
+
+    if (result) {
+      return successCode(
+        res,
+        `Delete one member from project with id ${id} successfully!`,
+        result
+      );
+    } else {
+      return errorCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 const updateProjectManyMembers = async (req, res) => {
   try {
     const { id } = req.params;
 
     const { idsArr } = req.body;
 
-    const { projectMembers, leaderId } = req.projectFound;
+    const { leaderId } = req.projectFound;
 
-    // Need to be disconnect
-    const projectMembersIdsNotInNewList = projectMembers
-      .map((pm) => pm.user.id)
-      .filter((userId) => !idsArr.includes(userId));
+    const isLeaderInNewList = idsArr.find((userId) => userId === leaderId);
 
-    const result = await updateOneProjectManyMembers(
-      id,
-      idsArr,
-      projectMembersIdsNotInNewList,
-      leaderId
-    );
+    if (!isLeaderInNewList) {
+      return failCode(res, 'Cannot delete leader from project!');
+    }
+
+    const result = await updateOneProjectManyMembers(id, idsArr, leaderId);
 
     if (result) {
       return successCode(
@@ -156,11 +204,34 @@ const updateProjectManyMembers = async (req, res) => {
   }
 };
 
+const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await deleteOneProject(id);
+
+    if (result) {
+      return successCode(
+        res,
+        `Delete project with id ${id} successfully!`,
+        result
+      );
+    } else {
+      return errorCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 module.exports = {
   getProjectsByUser,
   getProject,
   createProject,
   updateProject,
-  updateProjectAddOneMember,
+  updateProjectAddMember,
+  updateProjectDeleteMember,
   updateProjectManyMembers,
+  deleteProject,
 };

@@ -9,8 +9,8 @@ const {
 const { checkToken } = require('../utils/jwtoken');
 const {
   checkPermissionLoggedIn,
-  checkGetTaskPermission,
-  checkCreateTaskPermission,
+  checkProjectPermission,
+  checkProjectMemberPermission,
   checkTaskPermission,
 } = require('../utils/permission');
 const {
@@ -19,7 +19,7 @@ const {
   updateTask,
 } = require('../controllers/task.controller');
 const {
-  checkTaskMembersInProject,
+  checkUsersByIdsInProject,
   checkTaskName,
   checkTaskDeadline,
 } = require('../utils/databaseValidation');
@@ -31,7 +31,7 @@ taskRoute.get(
   checkToken,
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkGetTaskPermission,
+  checkProjectMemberPermission,
   getTask
 );
 
@@ -40,8 +40,8 @@ taskRoute.post(
   checkToken,
   validateBody(taskSchema),
   checkPermissionLoggedIn,
-  checkCreateTaskPermission,
-  checkTaskMembersInProject,
+  checkProjectPermission('body', 'listProjectId'),
+  checkUsersByIdsInProject,
   checkTaskDeadline,
   checkTaskName,
   createTask
@@ -54,7 +54,7 @@ taskRoute.put(
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
   checkTaskPermission,
-  checkTaskMembersInProject,
+  checkUsersByIdsInProject,
   checkTaskDeadline,
   checkTaskName,
   updateTask

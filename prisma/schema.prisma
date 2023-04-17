@@ -41,7 +41,7 @@ model List {
   id        Int     @default(1)
   projectId String  @db.VarChar(255)
   name      String  @default("To do") @db.VarChar(255)
-  inProject Project @relation(fields: [projectId], references: [id])
+  inProject Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks     Task[]
 
   @@id([projectId, id])
@@ -56,12 +56,12 @@ model Task {
   indexNumber   Int
   listId        Int          @default(1)
   listProjectId String
-  inList        List         @relation(fields: [listProjectId, listId], references: [projectId, id])
+  inList        List         @relation(fields: [listProjectId, listId], references: [projectId, id], onDelete: Cascade)
   taskMembers   TasksUsers[]
   comments      Comment[]
 
   @@unique([listProjectId, name], name: "uniqueTaskNamePerProject")
-  @@unique([listId, indexNumber], name: "listIndexNumber")
+  @@unique([listProjectId, listId, indexNumber], name: "listIndexNumber")
 }
 
 model Comment {
@@ -71,14 +71,14 @@ model Comment {
   authorId  String   @db.VarChar(255)
   author    User     @relation(fields: [authorId], references: [id])
   taskId    String   @db.VarChar(255)
-  inTask    Task     @relation(fields: [taskId], references: [id])
+  inTask    Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   projectId String   @db.VarChar(255)
-  inProject Project  @relation(fields: [projectId], references: [id])
+  inProject Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ProjectsUsers {
   projectId           String   @db.VarChar(255)
-  project             Project  @relation(fields: [projectId], references: [id])
+  project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   userId              String   @db.VarChar(255)
   user                User     @relation(fields: [userId], references: [id])
   assignedAt          DateTime @default(now())
@@ -90,7 +90,7 @@ model ProjectsUsers {
 
 model TasksUsers {
   taskId              String   @db.VarChar(255)
-  task                Task     @relation(fields: [taskId], references: [id])
+  task                Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   userId              String   @db.VarChar(255)
   user                User     @relation(fields: [userId], references: [id])
   assignedAt          DateTime @default(now())

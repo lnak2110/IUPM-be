@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('./config');
 const { unauthCode } = require('./response');
+const { validateIdFromToken } = require('./validation');
 
 const secretKey = config.SECRET_KEY;
 const tokenLife = config.TOKEN_LIFE;
@@ -23,6 +24,10 @@ const checkToken = (req, res, next) => {
     const accessToken = req.headers.authorization.split(' ')[1];
 
     const isTokenValid = verifyToken(accessToken);
+
+    // Check id is a UUID
+    validateIdFromToken(isTokenValid.content);
+
     if (isTokenValid) {
       next();
     }

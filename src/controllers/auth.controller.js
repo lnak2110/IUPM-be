@@ -43,7 +43,7 @@ const login = async (req, res) => {
     const userFound = await findOneUserByEmail(email);
 
     if (!userFound) {
-      return notFoundCode(res, 'Email does not exist!');
+      return notFoundCode(res, 'Email is not registered!');
     }
 
     const isPasswordCorrect = bcrypt.compareSync(password, userFound.password);
