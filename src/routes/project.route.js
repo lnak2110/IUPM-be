@@ -19,6 +19,7 @@ const {
   getProject,
   createProject,
   updateProject,
+  updateProjectToggleDone,
   updateProjectAddMember,
   updateProjectDeleteMember,
   updateProjectManyMembers,
@@ -42,6 +43,7 @@ projectRoute.get(
   getProjectsByUser
 );
 
+// ?short= for short data
 projectRoute.get(
   '/:id',
   checkToken,
@@ -69,6 +71,15 @@ projectRoute.put(
   checkProjectPermission('params', 'id'),
   checkProjectName,
   updateProject
+);
+
+projectRoute.patch(
+  '/:id/toggle-done',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectPermission('params', 'id'),
+  updateProjectToggleDone
 );
 
 projectRoute.patch(

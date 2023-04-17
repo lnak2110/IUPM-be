@@ -1,13 +1,14 @@
 const {
   findManyProjectsByUser,
+  findOneProjectsUsers,
   findOneProjectWithMembersListsTasks,
   createOneProject,
   updateOneProject,
+  updateOneProjectToggleDone,
   updateOneProjectAddOneMember,
   updateOneProjectDeleteOneMember,
   updateOneProjectManyMembers,
   deleteOneProject,
-  findOneProjectsUsers,
 } = require('../services/project.service');
 const {
   successCode,
@@ -40,6 +41,18 @@ const getProjectsByUser = async (req, res) => {
 const getProject = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const { short } = req.query;
+
+    const { projectFound } = req;
+
+    if (short) {
+      return successCode(
+        res,
+        `Get project with id ${id} successfully!`,
+        projectFound
+      );
+    }
 
     const result = await findOneProjectWithMembersListsTasks(id);
 
@@ -104,6 +117,37 @@ const updateProject = async (req, res) => {
         `Update project with id ${id} successfully!`,
         result
       );
+    } else {
+      return errorCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const updateProjectToggleDone = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { isDone } = req.projectFound;
+
+    const result = await updateOneProjectToggleDone(id, !isDone);
+
+    if (result) {
+      if (result.isDone) {
+        return successCode(
+          res,
+          `Set project with id ${id} done successfully!`,
+          result
+        );
+      } else {
+        return successCode(
+          res,
+          `Set project with id ${id} undone successfully!`,
+          result
+        );
+      }
     } else {
       return errorCode(res);
     }
@@ -230,6 +274,7 @@ module.exports = {
   getProject,
   createProject,
   updateProject,
+  updateProjectToggleDone,
   updateProjectAddMember,
   updateProjectDeleteMember,
   updateProjectManyMembers,

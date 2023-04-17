@@ -38,7 +38,7 @@ taskRoute.get(
 taskRoute.post(
   '/',
   checkToken,
-  validateBody(taskSchema),
+  validateBody(taskSchema()),
   checkPermissionLoggedIn,
   checkProjectPermission('body', 'listProjectId'),
   checkUsersByIdsInProject,
@@ -50,7 +50,7 @@ taskRoute.post(
 taskRoute.put(
   '/:id',
   checkToken,
-  validateBody(updateTaskSchema),
+  validateBody(taskSchema(false)),
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
   checkTaskPermission,

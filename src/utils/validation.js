@@ -27,7 +27,7 @@ const loginSchema = yup.object({
 const projectSchema = yup.object({
   body: yup.object({
     name: yup.string().trim().required(),
-    description: yup.string().trim().min(1).max(255),
+    description: yup.string().trim().max(255),
     deadline: yup
       .date()
       .transform((_value, originalValue) => {
@@ -41,52 +41,34 @@ const projectSchema = yup.object({
   }),
 });
 
-const taskSchema = yup.object({
-  body: yup.object({
-    name: yup.string().trim().required(),
-    description: yup.string().trim().min(1).max(255),
-    deadline: yup
-      .date()
-      .transform((_value, originalValue) => {
-        const parsedDate = isDate(originalValue)
-          ? originalValue
-          : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+const taskSchema = (isNewTask = true) =>
+  yup.object({
+    body: yup.object({
+      name: yup.string().trim().required(),
+      description: yup.string().trim().max(255),
+      deadline: yup
+        .date()
+        .transform((_value, originalValue) => {
+          const parsedDate = isDate(originalValue)
+            ? originalValue
+            : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
 
-        return parsedDate;
-      })
-      .min(new Date(Date.now())),
-    listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
-    listProjectId: yup.string().trim().uuid().required(),
-    taskMembers: yup
-      .array()
-      .of(yup.string().trim().uuid())
-      .unique('Duplicated members!', (a) => a)
-      .required(),
-  }),
-});
+          return parsedDate;
+        })
+        .min(new Date(Date.now())),
+      listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
 
-const updateTaskSchema = yup.object({
-  body: yup.object({
-    name: yup.string().trim().required(),
-    description: yup.string().trim().min(1).max(255),
-    deadline: yup
-      .date()
-      .transform((_value, originalValue) => {
-        const parsedDate = isDate(originalValue)
-          ? originalValue
-          : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+      ...(isNewTask && {
+        listProjectId: yup.string().trim().uuid().required(),
+      }),
 
-        return parsedDate;
-      })
-      .min(new Date(Date.now())),
-    listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
-    taskMembers: yup
-      .array()
-      .of(yup.string().trim().uuid())
-      .unique('Duplicated members!', (a) => a)
-      .required(),
-  }),
-});
+      taskMembers: yup
+        .array()
+        .of(yup.string().trim().uuid())
+        .unique('Duplicated members!', (a) => a)
+        .required(),
+    }),
+  });
 
 const idSchema = yup.object({
   body: yup.object({
@@ -145,11 +127,10 @@ module.exports = {
   registerSchema,
   loginSchema,
   projectSchema,
-  taskSchema,
-  updateTaskSchema,
   idSchema,
   idsArraySchema,
   idParamsSchema,
+  taskSchema,
   validateIdFromToken,
   validateBody,
   validateParams,
