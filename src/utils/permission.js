@@ -12,8 +12,9 @@ const {
 } = require('../services/project.service');
 const {
   findOneTask,
-  findOneTaskWithMembersAndComments,
+  findOneTaskWithMembers,
 } = require('../services/task.service');
+const { findOneComment } = require('../services/comment.service');
 
 // All roles
 const checkPermissionLoggedIn = async (req, res, next) => {
@@ -94,34 +95,38 @@ const checkProjectMemberPermission = async (req, res, next) => {
   }
 };
 
-const checkGetTaskPermission = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+const checkGetTaskPermission =
+  (selectMembers = true) =>
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
 
-    const { userRequest } = req;
+      const { userRequest } = req;
 
-    const taskFound = await findOneTaskWithMembersAndComments(id);
+      const taskFound = selectMembers
+        ? await findOneTaskWithMembers(id)
+        : await findOneTask(id);
 
-    if (!taskFound) {
-      return notFoundCode(res, 'Task not found!');
+      if (!taskFound) {
+        return notFoundCode(res, 'Task not found!');
+      }
+
+      const isUserInProject = await findOneProjectsUsers(
+        taskFound.listProjectId,
+        userRequest.id
+      );
+
+      if (isUserInProject || userRequest.isAdmin) {
+        selectMembers && (req.taskFound = taskFound);
+        next();
+      } else {
+        return forbiddenCode(res);
+      }
+    } catch (error) {
+      console.log(error);
+      return errorCode(res);
     }
-
-    const isUserInProject = await findOneProjectsUsers(
-      taskFound.listProjectId,
-      userRequest.id
-    );
-
-    if (isUserInProject || userRequest.isAdmin) {
-      req.taskFound = taskFound;
-      next();
-    } else {
-      return forbiddenCode(res);
-    }
-  } catch (error) {
-    console.log(error);
-    return errorCode(res);
-  }
-};
+  };
 
 const checkTaskPermission = async (req, res, next) => {
   try {
@@ -154,6 +159,67 @@ const checkTaskPermission = async (req, res, next) => {
   }
 };
 
+const checkCreateCommentPermission = async (req, res, next) => {
+  try {
+    const { taskId } = req.body;
+
+    const { userRequest } = req;
+
+    const taskFound = await findOneTask(taskId);
+
+    if (!taskFound) {
+      return notFoundCode(res, 'Task not found!');
+    }
+
+    const isUserInProject = await findOneProjectsUsers(
+      taskFound.listProjectId,
+      userRequest.id
+    );
+
+    if (isUserInProject || userRequest.isAdmin) {
+      req.taskFound = taskFound;
+      next();
+    } else {
+      return forbiddenCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const checkCommentPermission = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { userRequest } = req;
+
+    const commentFound = await findOneComment(id);
+
+    if (!commentFound) {
+      return notFoundCode(res, 'Comment not found!');
+    }
+
+    const isUserInProject = await findOneProjectsUsers(
+      commentFound.projectId,
+      userRequest.id
+    );
+
+    if (!isUserInProject) {
+      return forbiddenCode(res);
+    }
+
+    if (userRequest.id === commentFound.authorId || userRequest.isAdmin) {
+      next();
+    } else {
+      return forbiddenCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 module.exports = {
   checkPermissionLoggedIn,
   checkUserPermission,
@@ -161,4 +227,6 @@ module.exports = {
   checkProjectMemberPermission,
   checkGetTaskPermission,
   checkTaskPermission,
+  checkCreateCommentPermission,
+  checkCommentPermission,
 };

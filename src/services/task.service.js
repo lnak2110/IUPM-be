@@ -25,23 +25,6 @@ const findOneTaskWithMembers = async (id) => {
   return result;
 };
 
-const findOneTaskWithMembersAndComments = async (id) => {
-  const result = await prisma.task.findUnique({
-    where: { id },
-    include: {
-      taskMembers: {
-        select: {
-          user: { select: userPublicFields },
-        },
-        orderBy: membersOrder,
-      },
-      comments: true,
-    },
-  });
-
-  return result;
-};
-
 const findOneTaskByNameAndProject = async (name, projectId) => {
   const result = await prisma.task.findUnique({
     where: {
@@ -144,7 +127,6 @@ const deleteOneTask = async (id) => {
 module.exports = {
   findOneTask,
   findOneTaskWithMembers,
-  findOneTaskWithMembersAndComments,
   findOneTaskByNameAndProject,
   countTasksInList,
   createOneTask,
