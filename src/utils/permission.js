@@ -9,9 +9,11 @@ const { findOneUser } = require('../services/user.service');
 const {
   findOneProjectsUsers,
   findOneProject,
-  findOneProjectWithMembers,
 } = require('../services/project.service');
-const { findOneTaskWithMembers } = require('../services/task.service');
+const {
+  findOneTask,
+  findOneTaskWithMembersAndComments,
+} = require('../services/task.service');
 
 // All roles
 const checkPermissionLoggedIn = async (req, res, next) => {
@@ -92,21 +94,48 @@ const checkProjectMemberPermission = async (req, res, next) => {
   }
 };
 
+const checkGetTaskPermission = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { userRequest } = req;
+
+    const taskFound = await findOneTaskWithMembersAndComments(id);
+
+    if (!taskFound) {
+      return notFoundCode(res, 'Task not found!');
+    }
+
+    const isUserInProject = await findOneProjectsUsers(
+      taskFound.listProjectId,
+      userRequest.id
+    );
+
+    if (isUserInProject || userRequest.isAdmin) {
+      req.taskFound = taskFound;
+      next();
+    } else {
+      return forbiddenCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 const checkTaskPermission = async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const { userRequest } = req;
 
-    const taskFound = await findOneTaskWithMembers(id);
+    const taskFound = await findOneTask(id);
 
     if (!taskFound) {
       return notFoundCode(res, 'Task not found!');
     }
 
-    const projectFound = await findOneProjectWithMembers(
-      taskFound.listProjectId
-    );
+    const projectFound = await findOneProject(taskFound.listProjectId);
 
     if (projectFound) {
       if (userRequest.id === projectFound.leaderId || userRequest.isAdmin) {
@@ -130,5 +159,6 @@ module.exports = {
   checkUserPermission,
   checkProjectPermission,
   checkProjectMemberPermission,
+  checkGetTaskPermission,
   checkTaskPermission,
 };

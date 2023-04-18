@@ -16,6 +16,7 @@ const {
 } = require('../utils/permission');
 const {
   getProjectsByUser,
+  getProjectLists,
   getProject,
   createProject,
   updateProject,
@@ -43,7 +44,16 @@ projectRoute.get(
   getProjectsByUser
 );
 
-// ?short= for short data
+projectRoute.get(
+  '/:id/lists',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectMemberPermission,
+  getProjectLists
+);
+
+// ?data=short for short data
 projectRoute.get(
   '/:id',
   checkToken,
