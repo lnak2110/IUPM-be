@@ -81,7 +81,11 @@ const updateTask = async (req, res) => {
       );
 
       if (result) {
-        return successCode(res, `Update a task successfully!`, result);
+        return successCode(
+          res,
+          `Update task with id ${id} successfully!`,
+          result
+        );
       } else {
         return errorCode(res);
       }
@@ -117,7 +121,11 @@ const updateTask = async (req, res) => {
       );
 
       if (result) {
-        return successCode(res, `Update a task successfully!`, result);
+        return successCode(
+          res,
+          `Update task with id ${id} successfully!`,
+          result
+        );
       }
     }
   } catch (error) {

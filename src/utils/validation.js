@@ -70,6 +70,14 @@ const taskSchema = (isNewTask = true) =>
     }),
   });
 
+const commentSchema = (isNewComment = true) =>
+  yup.object({
+    body: yup.object({
+      content: yup.string().trim().min(1).max(255).required(),
+      ...(isNewComment && { taskId: yup.string().trim().uuid().required() }),
+    }),
+  });
+
 const idSchema = yup.object({
   body: yup.object({
     id: yup.string().trim().uuid().required(),
@@ -131,6 +139,7 @@ module.exports = {
   idsArraySchema,
   idParamsSchema,
   taskSchema,
+  commentSchema,
   validateIdFromToken,
   validateBody,
   validateParams,

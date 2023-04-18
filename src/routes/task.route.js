@@ -31,7 +31,7 @@ taskRoute.get(
   checkToken,
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkGetTaskPermission,
+  checkGetTaskPermission(),
   getTask
 );
 
