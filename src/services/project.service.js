@@ -20,6 +20,14 @@ const findOneProjectsUsers = async (id, userId) => {
   return result;
 };
 
+const findAllListsInProject = async (id) => {
+  const result = await prisma.list.findMany({
+    where: { projectId: id },
+  });
+
+  return result;
+};
+
 const findOneProject = async (id) => {
   const result = await prisma.project.findUnique({
     where: { id },
@@ -216,6 +224,7 @@ const deleteOneProject = async (id) => {
 module.exports = {
   findManyProjectsByUser,
   findOneProjectsUsers,
+  findAllListsInProject,
   findOneProject,
   findOneProjectByNameAndLeader,
   findOneProjectWithMembers,

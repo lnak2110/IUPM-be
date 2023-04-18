@@ -1,5 +1,6 @@
 const {
   findManyProjectsByUser,
+  findAllListsInProject,
   findOneProjectsUsers,
   findOneProjectWithMembersListsTasks,
   createOneProject,
@@ -9,6 +10,7 @@ const {
   updateOneProjectDeleteOneMember,
   updateOneProjectManyMembers,
   deleteOneProject,
+  findOneProject,
 } = require('../services/project.service');
 const {
   successCode,
@@ -29,8 +31,25 @@ const getProjectsByUser = async (req, res) => {
         `Get projects with user id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const getProjectLists = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await findAllListsInProject(id);
+
+    if (result) {
+      return successCode(
+        res,
+        `Get all lists in project with id ${id} successfully!`,
+        result
+      );
     }
   } catch (error) {
     console.log(error);
@@ -42,16 +61,20 @@ const getProject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { short } = req.query;
+    const { data } = req.query;
 
-    const { projectFound } = req;
+    if (data.trim().toLowerCase() === 'short') {
+      const result = await findOneProject(id);
 
-    if (short) {
-      return successCode(
-        res,
-        `Get project with id ${id} successfully!`,
-        projectFound
-      );
+      if (result) {
+        return successCode(
+          res,
+          `Get project with id ${id} successfully!`,
+          result
+        );
+      } else {
+        return notFoundCode(res, 'Project not found!');
+      }
     }
 
     const result = await findOneProjectWithMembersListsTasks(id);
@@ -88,8 +111,6 @@ const createProject = async (req, res) => {
 
     if (result) {
       return successCode(res, `Create a new project successfully!`, result);
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -117,8 +138,6 @@ const updateProject = async (req, res) => {
         `Update project with id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -148,8 +167,6 @@ const updateProjectToggleDone = async (req, res) => {
           result
         );
       }
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -173,8 +190,6 @@ const updateProjectAddMember = async (req, res) => {
         `Add one member to project with id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -208,8 +223,6 @@ const updateProjectDeleteMember = async (req, res) => {
         `Delete one member from project with id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -239,8 +252,6 @@ const updateProjectManyMembers = async (req, res) => {
         `Update members of project with id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -260,8 +271,6 @@ const deleteProject = async (req, res) => {
         `Delete project with id ${id} successfully!`,
         result
       );
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -271,6 +280,7 @@ const deleteProject = async (req, res) => {
 
 module.exports = {
   getProjectsByUser,
+  getProjectLists,
   getProject,
   createProject,
   updateProject,

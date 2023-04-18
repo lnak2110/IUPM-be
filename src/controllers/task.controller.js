@@ -1,22 +1,22 @@
 const {
-  findOneTaskWithMembersAndComments,
   countTasksInList,
   createOneTask,
   updateOneTask,
   updateManyTasksDecreaseIndexNumber,
+  deleteOneTask,
 } = require('../services/task.service');
 const { successCode, errorCode } = require('../utils/response');
 
 const getTask = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { taskFound } = req;
 
-    const result = await findOneTaskWithMembersAndComments(id);
-
-    if (result) {
-      return successCode(res, `Get task with id ${id} successfully!`, result);
-    } else {
-      return notFoundCode(res, 'Task not found!');
+    if (taskFound) {
+      return successCode(
+        res,
+        `Get task with id ${taskFound.id} successfully!`,
+        taskFound
+      );
     }
   } catch (error) {
     console.log(error);
@@ -51,8 +51,6 @@ const createTask = async (req, res) => {
 
     if (result) {
       return successCode(res, `Create a new task successfully!`, result);
-    } else {
-      return errorCode(res);
     }
   } catch (error) {
     console.log(error);
@@ -120,9 +118,26 @@ const updateTask = async (req, res) => {
 
       if (result) {
         return successCode(res, `Update a task successfully!`, result);
-      } else {
-        return errorCode(res);
       }
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await deleteOneTask(id);
+
+    if (result) {
+      return successCode(
+        res,
+        `Delete task with id ${id} successfully!`,
+        result
+      );
     }
   } catch (error) {
     console.log(error);
@@ -134,4 +149,5 @@ module.exports = {
   getTask,
   createTask,
   updateTask,
+  deleteTask,
 };

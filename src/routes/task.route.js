@@ -1,8 +1,7 @@
 const express = require('express');
 const {
-  taskSchema,
-  updateTaskSchema,
   idParamsSchema,
+  taskSchema,
   validateBody,
   validateParams,
 } = require('../utils/validation');
@@ -10,13 +9,14 @@ const { checkToken } = require('../utils/jwtoken');
 const {
   checkPermissionLoggedIn,
   checkProjectPermission,
-  checkProjectMemberPermission,
+  checkGetTaskPermission,
   checkTaskPermission,
 } = require('../utils/permission');
 const {
   getTask,
   createTask,
   updateTask,
+  deleteTask,
 } = require('../controllers/task.controller');
 const {
   checkUsersByIdsInProject,
@@ -31,7 +31,7 @@ taskRoute.get(
   checkToken,
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
-  checkProjectMemberPermission,
+  checkGetTaskPermission,
   getTask
 );
 
@@ -58,6 +58,15 @@ taskRoute.put(
   checkTaskDeadline,
   checkTaskName,
   updateTask
+);
+
+taskRoute.delete(
+  '/:id',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkTaskPermission,
+  deleteTask
 );
 
 module.exports = taskRoute;

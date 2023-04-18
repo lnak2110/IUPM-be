@@ -133,6 +133,14 @@ const updateManyTasksDecreaseIndexNumber = async (
   return result;
 };
 
+const deleteOneTask = async (id) => {
+  const result = await prisma.task.delete({
+    where: { id },
+  });
+
+  return result;
+};
+
 module.exports = {
   findOneTask,
   findOneTaskWithMembers,
@@ -142,4 +150,5 @@ module.exports = {
   createOneTask,
   updateOneTask,
   updateManyTasksDecreaseIndexNumber,
+  deleteOneTask,
 };
