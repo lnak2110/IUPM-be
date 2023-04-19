@@ -1,17 +1,38 @@
 const express = require('express');
-const { idSchema, validateParams } = require('../utils/validation');
+const {
+  userSchema,
+  idParamsSchema,
+  validateParams,
+  validateBody,
+  validateImageUrl,
+} = require('../utils/validation');
 const { checkToken } = require('../utils/jwtoken');
-const { getUserDetail } = require('../controllers/user.controller');
-const { checkUserPermission } = require('../utils/permission');
+const { getUser, updateUser } = require('../controllers/user.controller');
+const {
+  checkPermissionLoggedIn,
+  checkUserPermission,
+} = require('../utils/permission');
 
 const userRoute = express.Router();
 
 userRoute.get(
   '/:id',
   checkToken,
-  validateParams(idSchema),
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
   checkUserPermission,
-  getUserDetail
+  getUser
+);
+
+userRoute.patch(
+  '/:id',
+  checkToken,
+  validateBody(userSchema),
+  validateImageUrl,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkUserPermission,
+  updateUser
 );
 
 module.exports = userRoute;

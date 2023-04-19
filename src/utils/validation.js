@@ -1,6 +1,7 @@
+const isImageURL = require('image-url-validator').default;
 const yup = require('yup');
 const { parse, isDate } = require('date-fns');
-const { failCode } = require('./response');
+const { failCode, errorCode } = require('./response');
 
 // Yup test unique array elements
 yup.addMethod(yup.array, 'unique', function (message, mapper = (a) => a) {
@@ -78,6 +79,14 @@ const commentSchema = (isNewComment = true) =>
     }),
   });
 
+const userSchema = yup.object({
+  body: yup.object({
+    name: yup.string().trim().required(),
+    email: yup.string().trim().email().required(),
+    avatar: yup.string().trim().url(),
+  }),
+});
+
 const idSchema = yup.object({
   body: yup.object({
     id: yup.string().trim().uuid().required(),
@@ -101,7 +110,6 @@ const idParamsSchema = yup.object({
 });
 
 const validateIdFromToken = (id) => {
-  console.log(id);
   yup.string().trim().uuid().required().validateSync(id);
 };
 
@@ -131,10 +139,28 @@ const validateParams = (schema) => (req, res, next) => {
   }
 };
 
+const validateImageUrl = async (req, res, next) => {
+  try {
+    const { avatar } = req.body;
+
+    const imageUrlValids = await isImageURL(avatar);
+
+    if (imageUrlValids) {
+      next();
+    } else {
+      return failCode(res, 'Invalid image url!');
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 module.exports = {
   registerSchema,
   loginSchema,
   projectSchema,
+  userSchema,
   idSchema,
   idsArraySchema,
   idParamsSchema,
@@ -143,4 +169,5 @@ module.exports = {
   validateIdFromToken,
   validateBody,
   validateParams,
+  validateImageUrl,
 };

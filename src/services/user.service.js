@@ -111,9 +111,9 @@ const updateAvatarOfOneUser = async (userId, newUserAvatar) => {
   return result;
 };
 
-const updateOneUser = async (userId, newUserData) => {
+const updateOneUser = async (id, newUserData) => {
   const result = await prisma.user.update({
-    where: { userId },
+    where: { id },
     data: newUserData,
     select: userWithoutPassword,
   });
