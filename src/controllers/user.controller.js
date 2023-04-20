@@ -1,8 +1,42 @@
 const {
-  updateOneUser,
+  findAllUsers,
+  findAllUsersInProject,
   findOneUserByEmail,
+  updateOneUser,
 } = require('../services/user.service');
 const { successCode, failCode, errorCode } = require('../utils/response');
+
+const getAllUsers = async (_req, res) => {
+  try {
+    const result = await findAllUsers();
+
+    if (result) {
+      return successCode(res, `Get all users successfully!`, result);
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const getAllUsersInProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await findAllUsersInProject(id);
+
+    if (result) {
+      return successCode(
+        res,
+        `Get all users in project with id ${id} successfully!`,
+        result
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
 
 const getUser = async (req, res) => {
   try {
@@ -51,6 +85,8 @@ const updateUser = async (req, res) => {
 };
 
 module.exports = {
+  getAllUsers,
+  getAllUsersInProject,
   getUser,
   updateUser,
 };

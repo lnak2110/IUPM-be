@@ -7,13 +7,36 @@ const {
   validateImageUrl,
 } = require('../utils/validation');
 const { checkToken } = require('../utils/jwtoken');
-const { getUser, updateUser } = require('../controllers/user.controller');
+const {
+  getAllUsers,
+  getAllUsersInProject,
+  getUser,
+  updateUser,
+} = require('../controllers/user.controller');
 const {
   checkPermissionLoggedIn,
   checkUserPermission,
+  checkProjectMemberPermission,
 } = require('../utils/permission');
 
 const userRoute = express.Router();
+
+userRoute.get(
+  '/',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  getAllUsers
+);
+
+userRoute.get(
+  '/project/:id',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectMemberPermission,
+  getAllUsersInProject
+);
 
 userRoute.get(
   '/:id',
