@@ -96,6 +96,16 @@ const findOneUserSelectRole = async (userId) => {
 const findOneUserByEmail = async (email) => {
   const result = await prisma.user.findUnique({
     where: { email },
+    select: userWithoutPassword,
+  });
+
+  return result;
+};
+
+const createOneUser = async (newUserData) => {
+  const result = await prisma.user.create({
+    where: { id },
+    data: newUserData,
   });
 
   return result;
@@ -152,6 +162,7 @@ module.exports = {
   findOneUserSelectRoomsOwned,
   findOneUserSelectRole,
   findOneUserByEmail,
+  createOneUser,
   updateAvatarOfOneUser,
   updateOneUser,
   deleteOneUser,

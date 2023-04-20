@@ -7,7 +7,10 @@ const {
   successCode,
   notFoundCode,
 } = require('../utils/response');
-const { findOneUserByEmail } = require('../services/user.service');
+const {
+  findOneUserByEmail,
+  createOneUser,
+} = require('../services/user.service');
 
 const register = async (req, res) => {
   try {
@@ -19,15 +22,13 @@ const register = async (req, res) => {
       return failCode(res, 'Email already exists!');
     }
 
-    const newUser = {
+    const newUserData = {
       name,
       email,
       password: bcrypt.hashSync(password, 10),
     };
 
-    await prisma.user.create({
-      data: newUser,
-    });
+    await createOneUser(newUserData);
 
     return successCode(res, 'Register successfully!', { email });
   } catch (error) {
@@ -49,9 +50,13 @@ const login = async (req, res) => {
     const isPasswordCorrect = bcrypt.compareSync(password, userFound.password);
 
     if (isPasswordCorrect) {
-      const token = createToken(userFound.id);
+      const accessToken = createToken(userFound.id);
 
-      return successCode(res, 'Login successfully!', token);
+      const { id, name, email, avatar } = userFound;
+
+      const responseData = { id, name, email, avatar, accessToken };
+
+      return successCode(res, 'Login successfully!', responseData);
     } else {
       return failCode(res, 'Wrong combination of email and password!');
     }
