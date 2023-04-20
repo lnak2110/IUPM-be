@@ -1,3 +1,4 @@
+const { membersOrder } = require('../utils/fields');
 const {
   userWithoutPassword,
   userWithoutPasswordWithRole,
@@ -8,6 +9,19 @@ const prisma = require('../utils/prisma');
 const findAllUsers = async () => {
   const result = await prisma.user.findMany({
     select: userWithoutPassword,
+    orderBy: { email: true },
+  });
+
+  return result;
+};
+
+const findAllUsersInProject = async (projectId) => {
+  const result = await prisma.projectsUsers.findMany({
+    where: { projectId },
+    select: {
+      user: { select: userWithoutPassword },
+    },
+    orderBy: membersOrder,
   });
 
   return result;
@@ -96,7 +110,6 @@ const findOneUserSelectRole = async (userId) => {
 const findOneUserByEmail = async (email) => {
   const result = await prisma.user.findUnique({
     where: { email },
-    select: userWithoutPassword,
   });
 
   return result;
@@ -104,7 +117,6 @@ const findOneUserByEmail = async (email) => {
 
 const createOneUser = async (newUserData) => {
   const result = await prisma.user.create({
-    where: { id },
     data: newUserData,
   });
 
@@ -154,6 +166,7 @@ const deleteOneUser = async (userId) => {
 
 module.exports = {
   findAllUsers,
+  findAllUsersInProject,
   findManyUsersByName,
   findManyUsersByNamePagination,
   findManyUsersById,

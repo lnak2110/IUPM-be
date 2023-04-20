@@ -28,8 +28,14 @@ const membersOrder = [
   },
 ];
 
+const projectsByUserOrder = [
+  { isUserProjectLeader: order.desc },
+  { project: { name: order.asc } },
+];
+
 module.exports = {
   userWithoutPassword,
   userPublicFields,
   membersOrder,
+  projectsByUserOrder,
 };

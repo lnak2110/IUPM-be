@@ -23,7 +23,7 @@ const failCode = (res, message = 'Invalid or wrong format input!') => {
 };
 
 // 401
-const unauthCode = (res, message = 'Unauthorize!') => {
+const unauthCode = (res, message = 'Unauthorized!') => {
   return res.status(401).json({
     status: 'Failure',
     message,
