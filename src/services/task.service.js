@@ -25,6 +25,16 @@ const findOneTaskWithMembers = async (id) => {
   return result;
 };
 
+const findOneLatestDeadlineTaskByProject = async (id) => {
+  const result = await prisma.task.findFirst({
+    where: { listProjectId: id },
+    orderBy: { deadline: 'desc' },
+    take: 1,
+  });
+
+  return result;
+};
+
 const findOneTaskByNameAndProject = async (name, projectId) => {
   const result = await prisma.task.findUnique({
     where: {
@@ -127,6 +137,7 @@ const deleteOneTask = async (id) => {
 module.exports = {
   findOneTask,
   findOneTaskWithMembers,
+  findOneLatestDeadlineTaskByProject,
   findOneTaskByNameAndProject,
   countTasksInList,
   createOneTask,

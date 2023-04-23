@@ -28,7 +28,7 @@ const loginSchema = yup.object({
 const projectSchema = yup.object({
   body: yup.object({
     name: yup.string().trim().required(),
-    description: yup.string().trim().max(255),
+    description: yup.string().trim().nullable().max(255),
     deadline: yup
       .date()
       .transform((_value, originalValue) => {
@@ -46,7 +46,7 @@ const taskSchema = (isNewTask = true) =>
   yup.object({
     body: yup.object({
       name: yup.string().trim().required(),
-      description: yup.string().trim().max(255),
+      description: yup.string().trim().nullable().max(255),
       deadline: yup
         .date()
         .transform((_value, originalValue) => {

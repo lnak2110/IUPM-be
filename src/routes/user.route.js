@@ -21,13 +21,7 @@ const {
 
 const userRoute = express.Router();
 
-userRoute.get(
-  '/',
-  checkToken,
-  validateParams(idParamsSchema),
-  checkPermissionLoggedIn,
-  getAllUsers
-);
+userRoute.get('/', checkToken, checkPermissionLoggedIn, getAllUsers);
 
 userRoute.get(
   '/project/:id',
