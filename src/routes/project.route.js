@@ -28,6 +28,7 @@ const {
 } = require('../controllers/project.controller');
 const {
   checkProjectName,
+  checkProjectDeadline,
   checkUserById,
   checkUsersByIds,
 } = require('../utils/databaseValidation');
@@ -80,6 +81,7 @@ projectRoute.put(
   checkPermissionLoggedIn,
   checkProjectPermission('params', 'id'),
   checkProjectName,
+  checkProjectDeadline,
   updateProject
 );
 

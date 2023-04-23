@@ -2,7 +2,10 @@ const { compareAsc } = require('date-fns');
 const {
   findOneProjectByNameAndLeader,
 } = require('../services/project.service');
-const { findOneTaskByNameAndProject } = require('../services/task.service');
+const {
+  findOneTaskByNameAndProject,
+  findOneLatestDeadlineTaskByProject,
+} = require('../services/task.service');
 const { failCode, notFoundCode, errorCode } = require('./response');
 const {
   findOneUser,
@@ -90,6 +93,33 @@ const checkProjectName = async (req, res, next) => {
   }
 };
 
+// Updated prroject deadline cannot be earlier than latest task
+const checkProjectDeadline = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { deadline } = req.body;
+
+    const taskFound = await findOneLatestDeadlineTaskByProject(id);
+
+    if (!taskFound) {
+      next();
+    } else {
+      if (compareAsc(taskFound.deadline, new Date(deadline)) === 1) {
+        return failCode(
+          res,
+          'Project deadline must be later or equal deadline of lastest task!'
+        );
+      } else {
+        next();
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 const checkTaskName = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -136,6 +166,7 @@ module.exports = {
   checkUsersByIds,
   checkUsersByIdsInProject,
   checkProjectName,
+  checkProjectDeadline,
   checkTaskName,
   checkTaskDeadline,
 };
