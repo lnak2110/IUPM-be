@@ -23,6 +23,20 @@ const findAllUsersInProject = async (projectId) => {
   return result;
 };
 
+const findManyUsersOutsideProjectByKeyword = async (projectId, keyword) => {
+  const result = await prisma.user.findMany({
+    where: {
+      memberInProjects: {
+        every: { projectId: { notIn: projectId } },
+      },
+      OR: [{ email: { contains: keyword } }, { name: { contains: keyword } }],
+    },
+    select: userPublicFields,
+  });
+
+  return result;
+};
+
 const findManyUsersById = async (idsArr) => {
   const result = await prisma.user.findMany({
     where: {
@@ -104,6 +118,7 @@ const deleteOneUser = async (userId) => {
 module.exports = {
   findAllUsers,
   findAllUsersInProject,
+  findManyUsersOutsideProjectByKeyword,
   findManyUsersById,
   findManyUsersByIdInProject,
   findOneUser,

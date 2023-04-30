@@ -1,9 +1,10 @@
 const express = require('express');
 const {
   idParamsSchema,
-  taskSchema,
   validateBody,
   validateParams,
+  taskSchema,
+  updateTaskListSchema,
 } = require('../utils/validation');
 const { checkToken } = require('../utils/jwtoken');
 const {
@@ -16,12 +17,14 @@ const {
   getTask,
   createTask,
   updateTask,
+  updateTaskList,
   deleteTask,
 } = require('../controllers/task.controller');
 const {
   checkUsersByIdsInProject,
   checkTaskName,
   checkTaskDeadline,
+  checkTaskIndexNumber,
 } = require('../utils/databaseValidation');
 
 const taskRoute = express.Router();
@@ -58,6 +61,17 @@ taskRoute.put(
   checkTaskDeadline,
   checkTaskName,
   updateTask
+);
+
+taskRoute.patch(
+  '/:id/update-list',
+  checkToken,
+  validateBody(updateTaskListSchema),
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkTaskPermission,
+  checkTaskIndexNumber,
+  updateTaskList
 );
 
 taskRoute.delete(

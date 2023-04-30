@@ -2,6 +2,8 @@ const {
   countTasksInList,
   createOneTask,
   updateOneTask,
+  updateOneTaskSameList,
+  updateOneTaskNewList,
   updateManyTasksDecreaseIndexNumber,
   deleteOneTask,
 } = require('../services/task.service');
@@ -134,6 +136,56 @@ const updateTask = async (req, res) => {
   }
 };
 
+const updateTaskList = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { taskFound, projectFound } = req;
+
+    const { listId, indexNumber } = req.body;
+
+    if (listId === taskFound.listId) {
+      const result = await updateOneTaskSameList(
+        projectFound.id,
+        listId,
+        id,
+        taskFound.indexNumber,
+        indexNumber
+      );
+
+      if (result) {
+        return successCode(
+          res,
+          `Update task with id ${id} successfully!`,
+          result[1]
+        );
+      } else {
+        return errorCode(res);
+      }
+    } else {
+      const result = await updateOneTaskNewList(
+        projectFound.id,
+        taskFound.listId,
+        listId,
+        id,
+        taskFound.indexNumber,
+        indexNumber
+      );
+
+      if (result) {
+        return successCode(
+          res,
+          `Update task with id ${id} successfully!`,
+          result
+        );
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,5 +209,6 @@ module.exports = {
   getTask,
   createTask,
   updateTask,
+  updateTaskList,
   deleteTask,
 };

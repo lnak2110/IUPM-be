@@ -10,12 +10,14 @@ const { checkToken } = require('../utils/jwtoken');
 const {
   getAllUsers,
   getAllUsersInProject,
+  getUsersOutsideProjectByKeyword,
   getUser,
   updateUser,
 } = require('../controllers/user.controller');
 const {
   checkPermissionLoggedIn,
   checkUserPermission,
+  checkProjectPermission,
   checkProjectMemberPermission,
 } = require('../utils/permission');
 
@@ -30,6 +32,16 @@ userRoute.get(
   checkPermissionLoggedIn,
   checkProjectMemberPermission,
   getAllUsersInProject
+);
+
+// ?keyword=
+userRoute.get(
+  'outside/project/:id',
+  checkToken,
+  validateParams(idParamsSchema),
+  checkPermissionLoggedIn,
+  checkProjectPermission('params', 'id'),
+  getUsersOutsideProjectByKeyword
 );
 
 userRoute.get(
