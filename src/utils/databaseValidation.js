@@ -3,8 +3,9 @@ const {
   findOneProjectByNameAndLeader,
 } = require('../services/project.service');
 const {
-  findOneTaskByNameAndProject,
   findOneLatestDeadlineTaskByProject,
+  findOneTaskByNameAndProject,
+  countTasksInList,
 } = require('../services/task.service');
 const { failCode, notFoundCode, errorCode } = require('./response');
 const {
@@ -161,6 +162,29 @@ const checkTaskDeadline = (req, res, next) => {
   }
 };
 
+const checkTaskIndexNumber = async (req, res, next) => {
+  try {
+    const { listId, indexNumber } = req.body;
+
+    const { listProjectId } = req.taskFound;
+
+    const countResult = await countTasksInList(listProjectId, listId);
+
+    if (!countResult) {
+      return errorCode(res);
+    }
+
+    if (indexNumber <= countResult._count.tasks) {
+      next();
+    } else {
+      return failCode(res, 'Invalid new indexNumber!');
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
 module.exports = {
   checkUserById,
   checkUsersByIds,
@@ -169,4 +193,5 @@ module.exports = {
   checkProjectDeadline,
   checkTaskName,
   checkTaskDeadline,
+  checkTaskIndexNumber,
 };

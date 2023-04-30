@@ -3,6 +3,7 @@ const {
   findAllUsersInProject,
   findOneUserByEmail,
   updateOneUser,
+  findManyUsersOutsideProjectByKeyword,
 } = require('../services/user.service');
 const { successCode, failCode, errorCode } = require('../utils/response');
 
@@ -29,6 +30,27 @@ const getAllUsersInProject = async (req, res) => {
       return successCode(
         res,
         `Get all users in project with id ${id} successfully!`,
+        result
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
+
+const getUsersOutsideProjectByKeyword = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { keyword = '' } = req.query;
+
+    const result = await findManyUsersOutsideProjectByKeyword(id, keyword);
+
+    if (result) {
+      return successCode(
+        res,
+        `Get all users by keyword outside project with id ${id} successfully!`,
         result
       );
     }
@@ -87,6 +109,7 @@ const updateUser = async (req, res) => {
 module.exports = {
   getAllUsers,
   getAllUsersInProject,
+  getUsersOutsideProjectByKeyword,
   getUser,
   updateUser,
 };

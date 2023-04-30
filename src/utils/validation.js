@@ -71,6 +71,14 @@ const taskSchema = (isNewTask = true) =>
     }),
   });
 
+const updateTaskListSchema = () =>
+  yup.object({
+    body: yup.object({
+      listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
+      indexNumber: yup.number().integer().min(0).required(),
+    }),
+  });
+
 const commentSchema = (isNewComment = true) =>
   yup.object({
     body: yup.object({
@@ -164,6 +172,7 @@ module.exports = {
   idSchema,
   idsArraySchema,
   idParamsSchema,
+  updateTaskListSchema,
   taskSchema,
   commentSchema,
   validateIdFromToken,

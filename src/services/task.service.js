@@ -109,6 +109,91 @@ const updateOneTask = async (id, newTaskData, leaderId) => {
   return result;
 };
 
+const updateOneTaskSameList = async (
+  projectId,
+  listId,
+  id,
+  oldIndexNumber,
+  newIndexNumber
+) => {
+  const updateOtherTasks =
+    newIndexNumber - oldIndexNumber > 0
+      ? prisma.task.updateMany({
+          where: {
+            listProjectId: projectId,
+            listId,
+            AND: [
+              { indexNumber: { gt: oldIndexNumber } },
+              { indexNumber: { lte: newIndexNumber } },
+            ],
+          },
+          data: {
+            indexNumber: { decrement: 1 },
+          },
+        })
+      : prisma.task.updateMany({
+          where: {
+            listProjectId: projectId,
+            listId,
+            AND: [
+              { indexNumber: { lt: oldIndexNumber } },
+              { indexNumber: { gte: newIndexNumber } },
+            ],
+          },
+          data: {
+            indexNumber: { increment: 1 },
+          },
+        });
+
+  const updateMainTask = prisma.task.update({
+    where: { id },
+    data: { indexNumber: newIndexNumber },
+  });
+
+  // Execute same time
+  const result = prisma.$transaction([updateOtherTasks, updateMainTask]);
+
+  return result;
+};
+
+const updateOneTaskNewList = async (
+  projectId,
+  oldListId,
+  newListId,
+  id,
+  oldIndexNumber,
+  newIndexNumber
+) => {
+  await prisma.task.updateMany({
+    where: {
+      listProjectId: projectId,
+      listId: newListId,
+      indexNumber: { gt: newIndexNumber },
+    },
+    data: {
+      indexNumber: { increment: 1 },
+    },
+  });
+
+  const result = await prisma.task.update({
+    where: { id },
+    data: { indexNumber: newIndexNumber },
+  });
+
+  await prisma.task.updateMany({
+    where: {
+      listProjectId: projectId,
+      listId: oldListId,
+      indexNumber: { gt: oldIndexNumber },
+    },
+    data: {
+      indexNumber: { increment: 1 },
+    },
+  });
+
+  return result;
+};
+
 const updateManyTasksDecreaseIndexNumber = async (
   projectId,
   listId,
@@ -142,6 +227,8 @@ module.exports = {
   countTasksInList,
   createOneTask,
   updateOneTask,
+  updateOneTaskSameList,
+  updateOneTaskNewList,
   updateManyTasksDecreaseIndexNumber,
   deleteOneTask,
 };
