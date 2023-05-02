@@ -157,7 +157,7 @@ const updateTaskList = async (req, res) => {
         return successCode(
           res,
           `Update task with id ${id} successfully!`,
-          result[1]
+          result
         );
       } else {
         return errorCode(res);
