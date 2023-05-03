@@ -36,7 +36,7 @@ userRoute.get(
 
 // ?keyword=
 userRoute.get(
-  'outside/project/:id',
+  '/outside/project/:id',
   checkToken,
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
