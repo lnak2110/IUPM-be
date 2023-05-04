@@ -42,7 +42,7 @@ const createTask = async (req, res) => {
     const newTaskData = {
       name,
       description,
-      deadline: new Date(deadline),
+      deadline: deadline ? new Date(deadline) : deadline,
       indexNumber: countResult._count.tasks,
       listId,
       listProjectId,
@@ -104,7 +104,7 @@ const updateTask = async (req, res) => {
       const newTaskData = {
         name,
         description,
-        deadline: new Date(deadline),
+        deadline: deadline ? new Date(deadline) : deadline,
         indexNumber: countResult._count.tasks,
         listId,
         taskMembers,

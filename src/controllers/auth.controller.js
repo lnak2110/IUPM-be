@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const prisma = require('../utils/prisma');
 const { createToken } = require('../utils/jwtoken');
 const {
   errorCode,
