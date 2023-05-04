@@ -1,8 +1,13 @@
+const { userPublicFields } = require('../utils/fields');
 const prisma = require('../utils/prisma');
 
 const findManyCommentsByTask = async (id) => {
   const result = await prisma.comment.findMany({
     where: { taskId: id },
+    include: {
+      author: { select: userPublicFields },
+    },
+    orderBy: { createdAt: 'desc' },
   });
 
   return result;
