@@ -68,6 +68,14 @@ const findOneUser = async (id) => {
   return result;
 };
 
+const findOneUserFull = async (id) => {
+  const result = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  return result;
+};
+
 const findOneUserByEmail = async (email) => {
   const result = await prisma.user.findUnique({
     where: { email },
@@ -122,6 +130,7 @@ module.exports = {
   findManyUsersById,
   findManyUsersByIdInProject,
   findOneUser,
+  findOneUserFull,
   findOneUserByEmail,
   createOneUser,
   updateOneUser,

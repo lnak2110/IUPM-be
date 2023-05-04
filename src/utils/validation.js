@@ -26,49 +26,68 @@ const loginSchema = yup.object({
 });
 
 const projectSchema = yup.object({
-  body: yup.object({
-    name: yup.string().trim().required(),
-    description: yup.string().trim().nullable().max(255),
-    deadline: yup
-      .date()
-      .transform((_value, originalValue) => {
-        const parsedDate = isDate(originalValue)
-          ? originalValue
-          : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+  body: yup.object().shape(
+    {
+      name: yup.string().trim().required(),
+      description: yup.string().trim().nullable().max(255),
+      deadline: yup.date().when('deadline', ([value]) => {
+        if (value) {
+          return yup
+            .date()
+            .transform((_value, originalValue) => {
+              const parsedDate = isDate(originalValue)
+                ? originalValue
+                : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
 
-        return parsedDate;
-      })
-      .min(new Date(Date.now())),
-  }),
+              return parsedDate;
+            })
+            .min(new Date());
+        } else {
+          return yup.date().nullable().default(null);
+        }
+      }),
+    },
+    [['deadline', 'deadline']]
+  ),
 });
 
 const taskSchema = (isNewTask = true) =>
   yup.object({
-    body: yup.object({
-      name: yup.string().trim().required(),
-      description: yup.string().trim().nullable().max(255),
-      deadline: yup
-        .date()
-        .transform((_value, originalValue) => {
-          const parsedDate = isDate(originalValue)
-            ? originalValue
-            : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+    body: yup.object().shape(
+      {
+        name: yup.string().trim().required(),
+        description: yup.string().trim().nullable().max(255),
+        deadline: yup.date().when('deadline', ([value]) => {
+          if (value) {
+            return yup
+              .date()
+              .transform((_value, originalValue) => {
+                const parsedDate = isDate(originalValue)
+                  ? originalValue
+                  : parse(originalValue, "yyyy-MM-dd'T'HH:mm:ss", new Date());
 
-          return parsedDate;
-        })
-        .min(new Date(Date.now())),
-      listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
+                return parsedDate;
+              })
+              .min(new Date());
+          } else {
+            return yup.date().nullable().default(null);
+          }
+        }),
 
-      ...(isNewTask && {
-        listProjectId: yup.string().trim().uuid().required(),
-      }),
+        listId: yup.number().integer().oneOf([1, 2, 3, 4]).required(),
 
-      taskMembers: yup
-        .array()
-        .of(yup.string().trim().uuid())
-        .unique('Duplicated members!', (a) => a)
-        .required(),
-    }),
+        ...(isNewTask && {
+          listProjectId: yup.string().trim().uuid().required(),
+        }),
+
+        taskMembers: yup
+          .array()
+          .of(yup.string().trim().uuid())
+          .unique('Duplicated members!', (a) => a)
+          .required(),
+      },
+      [['deadline', 'deadline']]
+    ),
   });
 
 const updateTaskListSchema = yup.object({
@@ -90,7 +109,8 @@ const userSchema = yup.object({
   body: yup.object({
     name: yup.string().trim().required(),
     email: yup.string().trim().email().required(),
-    avatar: yup.string().trim().url(),
+    avatar: yup.string().trim().url().nullable(),
+    password: yup.string().trim().min(4).max(10).required(),
   }),
 });
 
@@ -150,12 +170,16 @@ const validateImageUrl = async (req, res, next) => {
   try {
     const { avatar } = req.body;
 
-    const imageUrlValids = await isImageURL(avatar);
+    if (avatar) {
+      const imageUrlValids = await isImageURL(avatar);
 
-    if (imageUrlValids) {
-      next();
+      if (imageUrlValids) {
+        next();
+      } else {
+        return failCode(res, 'Invalid image url!');
+      }
     } else {
-      return failCode(res, 'Invalid image url!');
+      next();
     }
   } catch (error) {
     console.log(error);

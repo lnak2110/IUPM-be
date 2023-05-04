@@ -103,7 +103,7 @@ const createProject = async (req, res) => {
     const newProjectData = {
       name,
       description,
-      deadline: new Date(deadline),
+      deadline: deadline ? new Date(deadline) : deadline,
       leaderId: id,
     };
 
@@ -127,7 +127,7 @@ const updateProject = async (req, res) => {
     const newProjectData = {
       name,
       description,
-      deadline: new Date(deadline),
+      deadline: deadline ? new Date(deadline) : deadline,
     };
 
     const result = await updateOneProject(id, newProjectData);

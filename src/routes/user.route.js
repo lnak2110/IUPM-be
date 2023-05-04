@@ -20,6 +20,7 @@ const {
   checkProjectPermission,
   checkProjectMemberPermission,
 } = require('../utils/permission');
+const { checkUserPassword } = require('../utils/databaseValidation');
 
 const userRoute = express.Router();
 
@@ -61,6 +62,7 @@ userRoute.patch(
   validateParams(idParamsSchema),
   checkPermissionLoggedIn,
   checkUserPermission,
+  checkUserPassword,
   updateUser
 );
 

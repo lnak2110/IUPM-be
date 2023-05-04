@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { compareAsc } = require('date-fns');
 const {
   findOneProjectByNameAndLeader,
@@ -9,10 +10,34 @@ const {
 } = require('../services/task.service');
 const { failCode, notFoundCode, errorCode } = require('./response');
 const {
-  findOneUser,
   findManyUsersById,
   findManyUsersByIdInProject,
+  findOneUser,
+  findOneUserFull,
 } = require('../services/user.service');
+
+const checkUserPassword = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { password } = req.body;
+
+    const userFound = await findOneUserFull(id);
+
+    if (!userFound) {
+      return notFoundCode(res, 'User not found!');
+    }
+
+    if (bcrypt.compareSync(password, userFound.password)) {
+      next();
+    } else {
+      return failCode(res, 'Wrong combination of email and password!');
+    }
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
+  }
+};
 
 const checkUserById = (part) => async (req, res, next) => {
   try {
@@ -109,7 +134,7 @@ const checkProjectDeadline = async (req, res, next) => {
       if (compareAsc(taskFound.deadline, new Date(deadline)) === 1) {
         return failCode(
           res,
-          'Project deadline must be later or equal deadline of lastest task!'
+          'Project deadline must be later or equal latest task deadline!'
         );
       } else {
         next();
@@ -186,6 +211,7 @@ const checkTaskIndexNumber = async (req, res, next) => {
 };
 
 module.exports = {
+  checkUserPassword,
   checkUserById,
   checkUsersByIds,
   checkUsersByIdsInProject,
