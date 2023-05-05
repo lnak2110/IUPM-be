@@ -72,7 +72,7 @@ const updateTask = async (req, res) => {
       const newTaskData = {
         name,
         description,
-        deadline: new Date(deadline),
+        deadline: deadline ? new Date(deadline) : deadline,
         taskMembers,
       };
 
