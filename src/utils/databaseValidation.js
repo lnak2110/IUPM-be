@@ -128,7 +128,7 @@ const checkProjectDeadline = async (req, res, next) => {
 
     const taskFound = await findOneLatestDeadlineTaskByProject(id);
 
-    if (!taskFound) {
+    if (!taskFound || !deadline) {
       next();
     } else {
       if (compareAsc(taskFound.deadline, new Date(deadline)) === 1) {
