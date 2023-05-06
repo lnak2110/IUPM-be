@@ -121,33 +121,44 @@ const updateOneTaskSameList = async (
     data: { indexNumber: -1 },
   });
 
-  newIndexNumber - oldIndexNumber > 0
-    ? await prisma.task.updateMany({
-        where: {
-          listProjectId: projectId,
-          listId,
-          AND: [
-            { indexNumber: { gt: oldIndexNumber } },
-            { indexNumber: { lte: newIndexNumber } },
-          ],
-        },
-        data: {
-          indexNumber: { decrement: 1 },
-        },
-      })
-    : await prisma.task.updateMany({
-        where: {
-          listProjectId: projectId,
-          listId,
-          AND: [
-            { indexNumber: { lt: oldIndexNumber } },
-            { indexNumber: { gte: newIndexNumber } },
-          ],
-        },
-        data: {
-          indexNumber: { increment: 1 },
-        },
-      });
+  if (newIndexNumber - oldIndexNumber > 0) {
+    await prisma.task.updateMany({
+      where: {
+        listProjectId: projectId,
+        listId,
+        AND: [
+          { indexNumber: { gt: oldIndexNumber } },
+          { indexNumber: { lte: newIndexNumber } },
+        ],
+      },
+      data: {
+        indexNumber: { decrement: 1 },
+      },
+    });
+  } else {
+    // Update from highest indexNumber to avoid unique constraint failed
+    const listTasks = await prisma.task.findMany({
+      where: {
+        listProjectId: projectId,
+        listId,
+        AND: [
+          { indexNumber: { lt: oldIndexNumber } },
+          { indexNumber: { gte: newIndexNumber } },
+        ],
+      },
+      select: { id: true },
+      orderBy: { indexNumber: 'desc' },
+    });
+
+    await prisma.$transaction(
+      listTasks.map((task) =>
+        prisma.task.update({
+          where: { id: task.id },
+          data: { indexNumber: { increment: 1 } },
+        })
+      )
+    );
+  }
 
   const result = await prisma.task.update({
     where: { id },
@@ -165,16 +176,25 @@ const updateOneTaskNewList = async (
   oldIndexNumber,
   newIndexNumber
 ) => {
-  await prisma.task.updateMany({
+  // Update from highest indexNumber to avoid unique constraint failed
+  const newListTasks = await prisma.task.findMany({
     where: {
       listProjectId: projectId,
       listId: newListId,
       indexNumber: { gte: newIndexNumber },
     },
-    data: {
-      indexNumber: { increment: 1 },
-    },
+    select: { id: true },
+    orderBy: { indexNumber: 'desc' },
   });
+
+  await prisma.$transaction(
+    newListTasks.map((task) =>
+      prisma.task.update({
+        where: { id: task.id },
+        data: { indexNumber: { increment: 1 } },
+      })
+    )
+  );
 
   const result = await prisma.task.update({
     where: { id },
