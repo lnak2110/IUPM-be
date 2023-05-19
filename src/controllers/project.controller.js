@@ -63,7 +63,7 @@ const getProject = async (req, res) => {
 
     const { data } = req.query;
 
-    if (data?.trim().toLowerCase() === 'short') {
+    if (data?.trim().toLowerCase() === 'basic') {
       const result = await findOneProject(id);
 
       if (result) {

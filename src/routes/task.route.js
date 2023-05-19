@@ -64,7 +64,7 @@ taskRoute.put(
 );
 
 taskRoute.patch(
-  '/:id/update-list',
+  '/:id/list',
   checkToken,
   validateBody(updateTaskListSchema),
   validateParams(idParamsSchema),
