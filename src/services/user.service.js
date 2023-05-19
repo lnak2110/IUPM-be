@@ -32,6 +32,7 @@ const findManyUsersOutsideProjectByKeyword = async (projectId, keyword) => {
       OR: [{ email: { contains: keyword } }, { name: { contains: keyword } }],
     },
     select: userPublicFields,
+    orderBy: { email: 'asc' },
   });
 
   return result;

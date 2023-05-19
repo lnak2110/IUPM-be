@@ -54,7 +54,7 @@ projectRoute.get(
   getProjectLists
 );
 
-// ?data=short for short data
+// ?data=basic for basic data
 projectRoute.get(
   '/:id',
   checkToken,
