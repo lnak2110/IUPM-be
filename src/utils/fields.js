@@ -26,6 +26,7 @@ const membersOrder = [
   {
     assignedAt: order.asc,
   },
+  { user: { name: order.asc } },
 ];
 
 const projectsByUserOrder = [

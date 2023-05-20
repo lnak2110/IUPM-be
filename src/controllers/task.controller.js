@@ -190,7 +190,15 @@ const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const { taskFound, projectFound } = req;
+
     const result = await deleteOneTask(id);
+
+    await updateManyTasksDecreaseIndexNumber(
+      projectFound.id,
+      taskFound.listId,
+      taskFound.indexNumber
+    );
 
     if (result) {
       return successCode(
